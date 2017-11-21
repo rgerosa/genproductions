@@ -16,13 +16,18 @@ from subprocess import Popen
 
 parser = OptionParser()
 parser.add_option('-b', action='store_true', dest='noX', default=False, help='no X11 windows')
-parser.add_option('--inputProcessDIR', action="store", type="string", dest="inputProcessDIR",      default="",   help="Input directory where the template file are stored")
-parser.add_option('--queque',          action="store", type="string", dest="queque",      default="8nh",   help="queque")
+parser.add_option('--inputProcessDIR', action="store", type="string", dest="inputProcessDIR", default="",    help="Input directory where the template file are stored")
+parser.add_option('--nameToGrep',      action="store", type="string", dest="nameToGrep",      default="",    help="Name to grep in the input directory")
+parser.add_option('--queque',          action="store", type="string", dest="queque",          default="1nd", help="queque")
 (options, args) = parser.parse_args()
 
 if __name__ == '__main__':
 
-    os.system("ls "+options.inputProcessDIR+" > file.list\n");
+    if options.nameToGrep != "":
+        os.system("ls "+options.inputProcessDIR+" | grep "+options.nameToGrep+" > file.list\n");
+    else:
+        os.system("ls "+options.inputProcessDIR+" > file.list\n");
+        
     file = open("file.list","r");    
     for lines in file:
         entry = lines.replace("\n","");
