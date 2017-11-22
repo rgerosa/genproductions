@@ -69,7 +69,14 @@ c are filled from the PDG codes (iPDG array) in this function.
 
       passcuts_user=.true. ! event is okay; otherwise it is changed
 
-
+C***************************************************************
+C***************************************************************
+C Cuts from the run_card.dat
+C***************************************************************
+C***************************************************************
+c
+c invisible particle cut
+c
       do i=0,nexternal
          do j=i+1,nexternal
             if ((abs(ipdg(i)).eq.18).and.(ipdg(i).eq.-ipdg(j))) then
@@ -81,25 +88,20 @@ c are filled from the PDG codes (iPDG array) in this function.
          enddo
       enddo
 
-
-C***************************************************************
-C***************************************************************
-C Cuts from the run_card.dat
-C***************************************************************
-C***************************************************************
+      
 c
 c CHARGED LEPTON CUTS
 c
 c find the charged leptons (also used in the photon isolation cuts below)
       do i=1,nexternal
          if(istatus(i).eq.1 .and.
-     &    (ipdg(i).eq.11 .or. ipdg(i).eq.13 .or. ipdg(i).eq.18)) then
+     &    (ipdg(i).eq.11 .or. ipdg(i).eq.13 .or. ipdg(i).eq.15)) then
             is_a_lm(i)=.true.
          else
             is_a_lm(i)=.false.
          endif
          if(istatus(i).eq.1 .and.
-     &    (ipdg(i).eq.-11 .or. ipdg(i).eq.-13 .or. ipdg(i).eq.-18)) then
+     &    (ipdg(i).eq.-11 .or. ipdg(i).eq.-13 .or. ipdg(i).eq.-15)) then
             is_a_lp(i)=.true.
          else
             is_a_lp(i)=.false.
@@ -127,212 +129,7 @@ c DeltaR and invariant mass cuts
                do j=nincoming+1,nexternal
                   if (is_a_lm(j)) then
                      if (drll.gt.0d0) then
-                        if (R2_04(p(0,i),p(0,j)).lt.drll**2) then
-                           passcuts_user=.false.
-                           return
-                        endif
-                     endif
-                     if (mll.gt.0d0) then
-                        if (invm2_04(p(0,i),p(0,j),1d0).lt.mll**2) then
-                           passcuts_user=.false.
-                           return
-                        endif
-                     endif
-                     if (ipdg(i).eq.-ipdg(j)) then
-                        if (drll_sf.gt.0d0) then
-                           if (R2_04(p(0,i),p(0,j)).lt.drll_sf**2) then
-                              passcuts_user=.false.
-                              return
-                           endif
-                        endif
-                        if (mll_sf.gt.0d0) then
-                           if (invm2_04(p(0,i),p(0,j),1d0).lt.mll_sf**2)
-     $                          then
-                              passcuts_user=.false.
-                              return
-                           endif
-                        endif
-                     endif
-                  endif
-               enddo
-            endif
-         endif
-      enddo
-c
-c JET CUTS
-c
-c find the jets
-      do i=1,nexternal
-         if (istatus(i).eq.1 .and.
-     &        (abs(ipdg(i)).le.maxjetflavor .or. ipdg(i).eq.21)) then
-            is_a_j(i)=.true.
-         else
-            is_a_j(i)=.false.
-         endif
-      enddo
-
-c If we do not require a mimimum jet energy, there's no need to apply
-c jet clustering and all that.
-      if (ptj.ne.0d0.or.ptgmin.ne.0d0) then
-c Put all (light) QCD partons in momentum array for jet clustering.
-c From the run_card.dat, maxjetflavor defines if b quark should be
-c considered here (via the logical variable 'is_a_jet').  nQCD becomes
-c the number of (light) QCD partons at the real-emission level (i.e. one
-c more than the Born).
-         nQCD=0
-         do j=nincoming+1,nexternal
-            if (is_a_j(j)) then
-               nQCD=nQCD+1
-               do i=0,3
-                  pQCD(i,nQCD)=p(i,j)
-               enddo
-            endif
-         enddo
-      endif
-
-c THE UNLOPS CUT:
-      if (ickkw.eq.4 .and. ptj.gt.0d0) then
-c Use special pythia pt cut for minimal pT
-         do i=1,nexternal
-            do j=0,3
-               p_unlops(j,i)=p(j,i)
-            enddo
-         enddo
-         call pythia_UNLOPS(p_unlops,passUNLOPScuts)
-         if (.not. passUNLOPScuts) then
-            passcuts_user=.false.
-            return
-         endif
-c Bypass normal jet cuts
-         goto 122
-c THE VETO XSEC CUT:
-      elseif (ickkw.eq.-1 .and. ptj.gt.0d0) then
-c Use veto'ed Xsec for analytic NNLL resummation
-         if (nQCD.ne.1) then
-            write (*,*) 'ERROR: more than one QCD parton in '/
-     $           /'this event in cuts.f. There should only be one'
-            stop
-         endif
-         if (pt(pQCD(0,1)) .gt. ptj) then
-            passcuts_user=.false.
-            return
-         endif
-      endif
-
-
-      if (ptj.gt.0d0.and.nQCD.gt.1) then
-
-c Cut some peculiar momentum configurations, i.e. two partons very soft.
-c This is needed to get rid of numerical instabilities in the Real emission
-c matrix elements when the Born has a massless final-state parton, but
-c no possible divergence related to it (e.g. t-channel single top)
-         mm=0
-         do j=1,nQCD
-            if(abs(pQCD(0,j)/p(0,1)).lt.1.d-8) mm=mm+1
-         enddo
-         if(mm.gt.1)then
-            passcuts_user=.false.
-            return
-         endif
-
-
-c Define jet clustering parameters (from cuts.inc via the run_card.dat)
-         palg=JETALGO           ! jet algorithm: 1.0=kt, 0.0=C/A, -1.0 = anti-kt
-         rfj=JETRADIUS          ! the radius parameter
-         sycut=PTJ              ! minimum transverse momentum
-
-c******************************************************************************
-c     call FASTJET to get all the jets
-c
-c     INPUT:
-c     input momenta:               pQCD(0:3,nexternal), energy is 0th component
-c     number of input momenta:     nQCD
-c     radius parameter:            rfj
-c     minumum jet pt:              sycut
-c     jet algorithm:               palg, 1.0=kt, 0.0=C/A, -1.0 = anti-kt
-c
-c     OUTPUT:
-c     jet momenta:                           pjet(0:3,nexternal), E is 0th cmpnt
-c     the number of jets (with pt > SYCUT):  njet
-c     the jet for a given particle 'i':      jet(i),   note that this is the
-c                                            particle in pQCD, which doesn't
-c                                            necessarily correspond to the particle
-c                                            label in the process
-c
-         call amcatnlo_fastjetppgenkt_etamax_timed(
-     $    pQCD,nQCD,rfj,sycut,etaj,palg,pjet,njet,jet)
-c
-c******************************************************************************
-
-c Apply the jet cuts
-         if (njet .ne. nQCD .and. njet .ne. nQCD-1) then
-            passcuts_user=.false.
-            return
-         endif
-      endif
- 122    continue
-c
-c PHOTON (ISOLATION) CUTS
-c
-c find the photons
-      do i=1,nexternal
-         if (istatus(i).eq.1 .and. ipdg(i).eq.22) then
-            is_a_ph(i)=.true.
-         else
-            is_a_ph(i)=.false.
-         endif
-      enddo
-      if (ptgmin.ne.0d0) then
-         nph=0
-         do j=nincoming+1,nexternal
-            if (is_a_ph(j)) then
-               nph=nph+1
-               do i=0,3
-                  pgamma(i,nph)=p(i,j)
-               enddo
-            endif
-         enddo
-         if(nph.eq.0)goto 444
-         
-         if(isoEM)then
-            nem=nph
-            do k=1,nem
-               do i=0,3
-                  pem(i,k)=pgamma(i,k)
-               enddo
-            enddo
-            do j=nincoming+1,nexternal
-               if (is_a_lp(j).or.is_a_lm(j)) then
-                  nem=nem+1
-                  do i=0,3
-                     pem(i,nem)=p(i,j)
-                  enddo
-               endif
-            enddo
-         endif
-         
-         alliso=.true.
-
-         j=0
-         do while(j.lt.nph.and.alliso)
-c Loop over all photons
-            j=j+1
-            
-            ptg=pt(pgamma(0,j))
-            if(ptg.lt.ptgmin)then
-               passcuts_user=.false.
-               return
-            endif
-            if (etagamma.gt.0d0) then
-               if (abs(eta(pgamma(0,j))).gt.etagamma) then
-                  passcuts_user=.false.
-                  return
-               endif
-            endif
-         
-c Isolate from hadronic energy
-            do i=1,nQCD
-               drlist(i)=sngl(iso_getdrv40(pgamma(0,j),pQCD(0,i)))
+                        if (R2_04(p(drv40(pgamma(0,j),pQCD(0,i)))
             enddo
             call sortzv(drlist,isorted,nQCD,ismode,isway,izero)
             Etsum(0)=0.d0
@@ -424,7 +221,6 @@ C***************************************************************
       include "nexternal.inc"
       include 'run.inc'
       include 'genps.inc'
-      include 'cuts.inc'
       include 'timing_variables.inc'
       REAL*8 P(0:3,nexternal),rwgt
       integer i,j,istatus(nexternal),iPDG(nexternal)
@@ -444,8 +240,8 @@ c PDG codes of particles
       integer maxflow
       parameter (maxflow=999)
       integer idup(nexternal,maxproc),mothup(2,nexternal,maxproc),
-     &     icolup(2,nexternal,maxflow),niprocs
-      common /c_leshouche_inc/idup,mothup,icolup,niprocs
+     &     icolup(2,nexternal,maxflow)
+      common /c_leshouche_inc/idup,mothup,icolup
       logical passcuts_user
       external passcuts_user
       call cpu_time(tBefore)
@@ -484,7 +280,6 @@ c Fill the arrays (momenta, status and PDG):
          enddo
          pp(4,i)=pmass(i)
          ipdg(i)=idup(i,1)
-         if (ipdg(i).eq.-21) ipdg(i)=21
       enddo
 c Call the actual cuts function  
       passcuts = passcuts_user(pp,istatus,ipdg)
@@ -902,9 +697,9 @@ c-----
       integer maxflow
       parameter (maxflow=999)
       integer idup(nexternal,maxproc),mothup(2,nexternal,maxproc),
-     &     icolup(2,nexternal,maxflow),niprocs
+     &     icolup(2,nexternal,maxflow)
 c      include 'leshouche.inc'
-      common /c_leshouche_inc/idup,mothup,icolup,niprocs
+      common /c_leshouche_inc/idup,mothup,icolup
       integer IDUP_tmp(nexternal),i
 c
       do i=1,nexternal
