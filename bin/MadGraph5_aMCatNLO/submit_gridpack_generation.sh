@@ -9,5 +9,4 @@ workqueue=${6}
 scram_arch=$7
 cmssw_version=$8
 
-mkdir -p ${name}
-bsub  -o ${name}/${name}".log" -e ${name}/${name}".err" -q ${masterqueue} -C 0  -R "rusage[mem=${memory}:pool=${diskspace}]" "export PRODHOME=`pwd`; gridpack_generation.sh ${name} ${carddir} ${workqueue} ${scram_arch} ${cmssw_version}"
+bsub -q ${masterqueue} -C 0  -R "rusage[mem=${memory}:pool=${diskspace}]" "export PRODHOME=`pwd`; gridpack_generation.sh ${name} ${carddir} ${workqueue} ${scram_arch} ${cmssw_version}"
