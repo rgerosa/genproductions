@@ -177,18 +177,18 @@ C-----
 
       PASSCUTS=.TRUE.           !EVENT IS OK UNLESS OTHERWISE CHANGED
 
-c      do iproc=1,maxsproc 
-c         do i=0,nexternal
-c            do j=i+1,nexternal
-c               if ((abs(idup(i,1,iproc)).eq.18).and.(idup(i,1,iproc).eq.-idup(j,1,iproc))) then
-c                   if (ptZ(p(0,i),p(0,j)).lt.150) then
-c                      passcuts =.false.
-c                      return
-c                   endif
-c               endif
-c            enddo
-c         enddo
-c      enddo
+      do iproc=1,maxsproc 
+         do i=0,nexternal
+            do j=i+1,nexternal
+               if ((abs(idup(i,1,iproc)).eq.18).and.(idup(i,1,iproc).eq.-idup(j,1,iproc))) then
+                   if (ptZ(p(0,i),p(0,j)).lt.150) then
+                      passcuts =.false.
+                      return
+                   endif
+               endif
+            enddo
+         enddo
+      enddo
 
       IF (FIRSTTIME) THEN
          FIRSTTIME=.FALSE.
