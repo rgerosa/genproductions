@@ -43,16 +43,14 @@ if __name__ == '__main__':
         else:
             if options.produceProcess:
                 os.system("mkdir -p "+entry);
-                os.system("cp "+options.inputProcessDIR+"/"+entry+"/*proc_card.dat ./");
+                os.system("scp "+options.inputProcessDIR+"/"+entry+"/*proc_card.dat ./");
                 os.system("./bin/mg5_aMC -f "+entry+"_proc_card.dat");
                 os.system("rm *proc_card.dat");
-                os.system("cp "+options.inputProcessDIR+"/"+entry+"/* "+entry);
+                os.system("scp "+options.inputProcessDIR+"/"+entry+"/* "+entry);
             elif options.produceGridPack:
 
                 os.chdir(cwd);
-                print cwd
                 os.chdir(options.inputProcessDIR+"/"+entry);
-                print os.getcwd()
                 
                 
                 #### fix the PDF
@@ -61,14 +59,17 @@ if __name__ == '__main__':
                     isnlo = 1;
 
                 #### copy files
-                os.system("cp *cuts.f SubProcesses/cuts.f");
-                os.system("cp *run_card* Cards/run_card.dat");
-                os.system("cp *param_card* Cards/param_card.dat");
-                os.system("cp *setscales.f Cards/setscales.f");
-                os.system("cp *reweight_card.dat Cards/reweight_card.dat");
+                
+                print os.getcwd()
+                os.system("scp *_cuts.f SubProcesses/cuts.f");
+                os.system("scp *_run_card.dat Cards/run_card.dat");
+                os.system("scp *_param_card.dat Cards/param_card.dat");
+                os.system("scp *_setscales.f Cards/setscales.f");
+                os.system("scp *_setcuts.f Cards/setcuts.f");
+                os.system("scp *_reweight_card.dat Cards/reweight_card.dat");
 
                 if isnlo:
-                    os.system("cp *madspin_card.dat Cards/madspin_card.dat");
+                    os.system("scp *_madspin_card.dat Cards/madspin_card.dat");
                     makegrid = open("makegrid.dat","w");
                     makegrid.write("shower=OFF \n");
                     makegrid.write("done \n");                    
@@ -77,7 +78,7 @@ if __name__ == '__main__':
                     makegrid.write("done \n");
                     os.system("cat makegrid.dat | ./bin/generate_events -n pilotrun");
                 else:
-                    os.system("cp *madspin_card.dat Cards/madspin_card.dat");
+                    os.system("scp *_madspin_card.dat Cards/madspin_card.dat");
                     makegrid = open("makegrid.dat","w");
                     makegrid.write("done \n");                    
                     makegrid.write("set gridpack True \n");                    

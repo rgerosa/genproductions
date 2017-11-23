@@ -91,7 +91,7 @@ c     reading parameters
 c For checking the consistency of the grouping and the cuts defined here
       integer iproc
       logical equal
-      LOGICAL  IS_A_J_SAVE(NEXTERNAL),IS_A_L_SAVE(NEXTERNAL),IS_A_DM_SAVE(NEXTERNAL),
+      LOGICAL  IS_A_J_SAVE(NEXTERNAL),IS_A_L_SAVE(NEXTERNAL),IS_A_DM_SAVE(NEXTERNAL)
      $     ,IS_A_B_SAVE(NEXTERNAL),IS_A_A_SAVE(NEXTERNAL)
      $     ,IS_A_ONIUM_SAVE(NEXTERNAL),IS_A_NU_SAVE(NEXTERNAL)
      $     ,IS_HEAVY_SAVE(NEXTERNAL),DO_CUTS_SAVE(NEXTERNAL)
@@ -99,14 +99,14 @@ c For checking the consistency of the grouping and the cuts defined here
      $     ,r2max_save(nexternal,nexternal),s_min_save(nexternal
      $     ,nexternal),s_max_save(nexternal,nexternal)
      $     ,ptll_min_save(nexternal,nexternal),ptll_max_save(nexternal
-     $     ,nexternal),ptboson_min(nexternal,nexternal),ptboson_max(nexternal,nexternal),
+     $     ,nexternal),ptboson_min_save(nexternal,nexternal),ptboson_max_save(nexternal,nexternal)
      &     ,etmin_save(nexternal),etmax_save(nexternal)
      $     ,emin_save(nexternal) ,emax_save(nexternal)
      $     ,etamin_save(nexternal),etamax_save(nexternal)
       save  IS_A_J_SAVE,IS_A_L_SAVE,IS_A_DM_SAVE,IS_A_B_SAVE,IS_A_A_SAVE
      $     ,IS_A_ONIUM_SAVE,IS_A_NU_SAVE,IS_HEAVY_SAVE
      $     ,r2min_save,r2max_save,s_min_save,s_max_save,ptll_min_save
-     $     ,ptll_max_save,ptboson_min,ptboson_max,etmin_save,etmax_save,emin_save,emax_save
+     $     ,ptll_max_save,ptboson_min_save,ptboson_max_save,etmin_save,etmax_save,emin_save,emax_save
      $     ,etamin_save,etamax_save
 c
 c     setup masses for the final-state particles
