@@ -36,7 +36,6 @@ C**************************************************************************
 c
 c     Constants
 c
-
       include 'genps.inc'
       include 'nexternal.inc'
       include 'coupl.inc'
@@ -96,9 +95,10 @@ C VARIABLES FOR KT CUT
       double precision r2max(nincoming+1:nexternal,nincoming+1:nexternal)
       double precision s_max(nexternal,nexternal)
       double precision ptll_min(nexternal,nexternal),ptll_max(nexternal,nexternal)
+      double precision ptboson_min(nexternal,nexternal),ptboson_max(nexternal,nexternal)
       double precision inclHtmin,inclHtmax
       common/to_cuts/  etmin, emin, etamax, r2min, s_min,
-     $     etmax, emax, etamin, r2max, s_max, ptll_min, ptll_max, inclHtmin,inclHtmax
+     $     etmax, emax, etamin, r2max, s_max, ptll_min, ptll_max, ptboson_min, ptboson_max, inclHtmin,inclHtmax
 
       double precision ptjmin4(4),ptjmax4(4),htjmin4(2:4),htjmax4(2:4)
       logical jetor
@@ -107,12 +107,6 @@ C VARIABLES FOR KT CUT
       double precision ptlmin4(4),ptlmax4(4)
       common/to_lepton_cuts/ ptlmin4,ptlmax4
 
-      include 'maxamps.inc'
-      integer idup(nexternal,maxproc,maxsproc)
-      integer mothup(2,nexternal)
-      integer icolup(2,nexternal,maxflow,maxsproc)
-      include 'leshouche.inc'
-      integer iproc
 c
 c     Special cuts
 c
@@ -176,19 +170,6 @@ C-----
 
 
       PASSCUTS=.TRUE.           !EVENT IS OK UNLESS OTHERWISE CHANGED
-
-      do iproc=1,maxsproc 
-         do i=0,nexternal
-            do j=i+1,nexternal
-               if ((abs(idup(i,1,iproc)).eq.18).and.(idup(i,1,iproc).eq.-idup(j,1,iproc))) then
-                   if (ptZ(p(0,i),p(0,j)).lt.150) then
-                      passcuts =.false.
-                      return
-                   endif
-               endif
-            enddo
-         enddo
-      enddo
 
       IF (FIRSTTIME) THEN
          FIRSTTIME=.FALSE.
@@ -462,7 +443,25 @@ c
          enddo
       enddo
 
+c     dark-matter candidates
+c     
 
+      do i=nincoming+1,nexternal-1
+         do j=i+1,nexternal
+            if(debug)write (*,*) 'ptboson(',i,',',j,')=',PtDot(p(0,i),p(0,j))
+            if(debug)write (*,*) ptboson_min(j,i),ptboson_max(j,i)
+            if(ptboson_min(j,i).gt.0.or.ptboson_max(j,i).ge.0d0) then
+               tmp=PtDot(p(0,i),p(0,j))
+               notgood=(tmp .lt. ptboson_min(j,i).or.
+     $              ptboson_max(j,i).ge.0d0 .and. tmp.gt.ptboson_max(j,i))
+               if (notgood) then
+                  if(debug) write (*,*) i,j,' -> fails'
+                  passcuts=.false.
+                  return
+               endif
+            endif
+         enddo
+      enddo
 
 
 c     

@@ -50,7 +50,7 @@
 #*********************************************************************
  'lhapdf'             = pdlabel     ! PDF set                                  
  262000               = lhaid
- 262000               = reweight_PDF
+ True                 = reweight_PDF
 #*********************************************************************
 # Renormalization and factorization scales                           *
 #*********************************************************************
@@ -189,6 +189,11 @@
 #*********************************************************************
  0   = ptllmin  ! Minimum pt for 4-momenta sum of leptons(l and vl)
  -1  = ptllmax  ! Maximum pt for 4-momenta sum of leptons(l and vl)
+#*********************************************************************
+# Minimum and maximum pt for 4-momenta sum of DM particles                *
+#*********************************************************************
+ 50    = ptbosonmin  ! Minimum pt for 4-momenta sum of leptons(l and vl)
+ -1    = ptbosonmax  ! Maximum pt for 4-momenta sum of leptons(l and vl)
 #*********************************************************************
 # Inclusive cuts                                                     *
 #*********************************************************************
