@@ -1,8 +1,0 @@
-import model Pseudoscalar_2HDM-bbMET_5FS
-# Define multiparticle labels
-define p = g u c d s u~ c~ d~ s~ b b~ 
-define j =  g u c d s b u~ c~ d~ s~ b~ 
-generate p p  > xd xd~ j [QCD] 
-
-
-output MonoJ_mh3_600_mh4_200 -nojpeg 
