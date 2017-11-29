@@ -88,3 +88,4 @@ if __name__ == '__main__':
                     os.system("cat makegrid.dat | ./bin/generate_events -n pilotrun");
 
     os.system("rm file.list");
+                    

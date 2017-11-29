@@ -544,12 +544,6 @@ if [ -e $CARDSDIR/${name}_cuts.f ]; then
 fi
 
 #copy provided custom fks params or cuts
-if [ -e $CARDSDIR/${name}_cuts.inc ]; then
-  echo "copying custom cuts.inc file"
-  cp $CARDSDIR/${name}_cuts.inc ./Source/cuts.inc
-fi
-
-#copy provided custom fks params or cuts
 if [ -e $CARDSDIR/${name}_setcuts.f ]; then
   echo "copying custom setcuts.f file"
   cp $CARDSDIR/${name}_setcuts.f ./SubProcesses/setcuts.f
@@ -633,6 +627,10 @@ else
   #######################
 
   echo "starting LO mode"
+
+  if [ -e $CARDSDIR/${name}_madspin_card.dat ]; then
+    cp $CARDSDIR/${name}_madspin_card.dat ./Cards/madspin_card.dat
+  fi
 
   echo "done" > makegrid.dat
   echo "set gridpack True" >> makegrid.dat
