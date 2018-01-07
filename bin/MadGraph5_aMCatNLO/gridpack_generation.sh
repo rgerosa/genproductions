@@ -271,6 +271,11 @@ if [ ! -d ${AFS_GEN_FOLDER}/${name}_gridpack ]; then
   sed -i "s#INCLUDES = -I../include#INCLUDES = -I../include -I${BOOSTINCLUDES}#g" src/Makefile  
   PATH=`${LHAPDFCONFIG} --prefix`/bin:${PATH} make
   cd ..
+
+  cd vendor/CutTools/
+  make clean;
+  make;
+  cd ../..
   
   #load extra models if needed
   if [ -e $CARDSDIR/${name}_extramodels.dat ]; then
@@ -281,7 +286,11 @@ if [ ! -d ${AFS_GEN_FOLDER}/${name}_gridpack ]; then
       #get needed BSM model
       if [[ $model = *[!\ ]* ]]; then
         echo "Loading extra model $model"
-        wget --no-verbose --no-check-certificate https://cms-project-generators.web.cern.ch/cms-project-generators/$model	
+	if [[ -e $CARDSDIR/$model ]]; then
+            cp $CARDSDIR/$model .
+        else
+            wget --no-verbose --no-check-certificate https://cms-project-generators.web.cern.ch/cms-project-generators/$model	
+	fi
         cd models
         if [[ $model == *".zip"* ]]; then
           unzip ../$model
@@ -330,9 +339,7 @@ if [ ! -d ${AFS_GEN_FOLDER}/${name}_gridpack ]; then
     echo $CARDSDIR/${name}_run_card.dat " does not exist!"
     if [ "${BASH_SOURCE[0]}" != "${0}" ]; then return 1; else exit 1; fi
   fi  
-
-
-  
+ 
   cp $CARDSDIR/${name}_proc_card.dat ${name}_proc_card.dat
  
 
